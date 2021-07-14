@@ -1,10 +1,10 @@
-// import logo from './logo.svg';
-// import './App.css';
+import logo from './logo.svg';
+import './App.css';
 
-// importing react & useState - I'm guessing I'll need state
-import React, { useState } from 'react';
+// importing react & useState & useEffect - I'm guessing I'll need state
+import React, { useState, useEffect } from 'react';
 
-// importing Form.js into App.js
+// importing components Form.js into App.js
 import Form from "./Form";
 
 // importing key id generator
@@ -18,29 +18,19 @@ const initialFormValues = {
 }
 
 function App() {
-  // setting up state & passing object from initialFormValues to set up a new user -??? I think
-  const [newUser, setNewUser] = useState([{
-    username: 'Alieze',
-    email: 'alieze@gmail.com',
-    password: '1234567',
-    //gotta come back to this for install and figure that out!!!???
-    id: uuid(), 
-  }])
-
-  // adding form state ??? help - why exactly am i doing this or how does this work
-  // const [formValues, setFormValues] = useState(initialFormValues)
-
-  // adding another form state slice ??? need help understanding
   
+  // adding state to hold list of users
+  const [userList, setUserList] = useState([])
 
-  // adding submit function to update list of new users and add functionality  to add new user
-
-
-
+  
+    console.log(userList)
 
   return (
     <div className="App">
-      <Form />
+      {/* passing down state, everything after Form is a prop */}
+      <Form userList={userList} setUserList={setUserList}/>
+      {/* or you can make a component and loop over like in last sprint */}
+      <pre>{JSON.stringify(userList)}</pre>
     </div>
   );
 }
