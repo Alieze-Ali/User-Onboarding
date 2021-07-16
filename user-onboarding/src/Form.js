@@ -5,7 +5,14 @@ import axios from 'axios';
 // import yup - here
 import * as yup from 'yup';
 
-// set up export & form function
+// set validation schema
+// ??? I'm sure there's a better way to require @ and special chars - not sure how, will look up later ???
+const schema = yup.object().shape({
+    name: yup.string().required('user name is required').min(6, 'user name needs to be 6 chars min'),
+    email: yup.string().email('email must include @ symbol'),
+    password: yup.string().required('password is required').min(6, 'password needs to be 8 chars min and include at least 1 special char'),
+    terms: yup.boolean().oneOf([true], 'you must agree to terms to continue'),
+})
 
 export default function Form(props){
 // passing props - to access state from another component
@@ -19,15 +26,41 @@ const initialState = {
     terms: false,
 
 }
+const initialErrorState = {
+    name: '',
+    email: '',
+    password: '',
+    terms: '',
 
+}
 // creating a slice of state & initializing with initial state object above
 const [formData, setFormData] = useState(initialState)
+// creating another slice of state to set the state of the button 
+const [disabled, setDisabled] = useState(true)
+// creating state for errors
+const [errors, setErrors] = useState(initialErrorState)
+// setting state for setFormErrors helper
+const setFormErrors = (name, value) => {
+    yup.reach(schema, name).validate(value)
+    .then(() => setErrors({...errors, [name]: ''}))
+    .catch(err => setErrors({...errors, [name]: err.errors[0]}))
+}
+
+// adding useEffect to fire if yup schema passes in order to enable submit button functionality
+// ??? IDK how to describe this - & a little help understanding exactly what it's doing
+useEffect(() => {
+    schema.isValid(formData)
+    .then(valid => setDisabled(!valid))
+}, [formData])
 
 // a function to handle each event (evt) and storing the changes held in the destructured variables (name, value, etc)
 const onChange = evt => {
     const { name, value, checked, type } = evt.target;
     // to handle both type of inputs
     const trueValue = type === 'checkbox' ? checked: value;
+    // helper that will check whether the value to use is legit & will update validation errors if needed
+    setFormErrors(name, trueValue)
+   
     //console.log(name, value);
     // updating current state by making copy of initialData, to keep original data safe
     setFormData(
@@ -59,6 +92,13 @@ const onSubmit = (e) => {
 
 
 return (
+    // ??? IDK why this breaks it
+    // <div style={{ color: 'red'}}>
+    //     <div>{errors.name}</div>
+    //     <div>{errors.email}</div>
+    //     <div>{errors.password}</div>
+    //     <div>{errors.terms}</div>
+    // </div>
     <form onSubmit={onSubmit}> New User Onboarding Form
         <div>
             <label>User Name:
@@ -74,13 +114,10 @@ return (
                 <input type="checkbox" name="terms" onChange={onChange} value={formData.terms} />  
                     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Mollis nunc sed id semper risus in hendrerit gravida rutrum.</p> 
                     
-                    <p>Id aliquet risus feugiat in ante metus dictum at tempor. Accumsan lacus vel facilisis volutpat est velit.</p> 
-                    
-                    <p>Sodales ut eu sem integer. Purus sit amet volutpat consequat mauris nunc congue. Dignissim sodales ut eu sem integer vitae justo eget magna. Orci a scelerisque purus semper.</p> 
             </label>
 
            <div>
-            <button type="submit">Submit</button>
+            <button disabled={disabled} type="submit">Submit</button>
            </div>
         </div>
         </form>
