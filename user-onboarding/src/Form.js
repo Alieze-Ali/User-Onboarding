@@ -42,8 +42,18 @@ const [errors, setErrors] = useState(initialErrorState)
 // setting state for setFormErrors helper
 const setFormErrors = (name, value) => {
     yup.reach(schema, name).validate(value)
-    .then(() => setErrors({...errors, [name]: ''}))
-    .catch(err => setErrors({...errors, [name]: err.errors[0]}))
+    .then(() => {
+        setErrors({
+        ...errors, [name]: ''})
+        setDisabled(false)
+    })
+    .catch(err => {
+        setErrors({
+            ...errors, 
+            [name]: err.errors[0]
+        })
+        setDisabled(true)
+    })
 }
 
 // adding useEffect to fire if yup schema passes in order to enable submit button functionality
@@ -92,14 +102,14 @@ const onSubmit = (e) => {
 
 
 return (
-    // ??? IDK why this breaks it
-    // <div style={{ color: 'red'}}>
-    //     <div>{errors.name}</div>
-    //     <div>{errors.email}</div>
-    //     <div>{errors.password}</div>
-    //     <div>{errors.terms}</div>
-    // </div>
+    // note validation div needs a parent element
     <form onSubmit={onSubmit}> New User Onboarding Form
+        <div style={{ color: 'red'}}>
+            <div>{errors.name}</div>
+            <div>{errors.email}</div>
+            <div>{errors.password}</div>
+            <div>{errors.terms}</div>
+        </div>
         <div>
             <label>User Name:
                 <input type="text" name="name" onChange={onChange} value={formData.name} />
